@@ -43,6 +43,8 @@ Given /^the blog is set up$/ do
                 :state => 'active'})
 end
 
+
+
 And /^I am logged into the admin panel$/ do
   visit '/accounts/login'
   fill_in 'user_login', :with => 'admin'
@@ -275,4 +277,35 @@ end
 
 Then /^show me the page$/ do
   save_and_open_page
+end
+
+Given /I am logged in as "(.*?)" with passphrase "(.*?)"$/ do |user, pass|
+  visit '/accounts/login'
+  fill_in 'user_login', :with => user
+  fill_in 'user_password', :with => pass
+  click_button 'Login'
+  assert page.has_content? 'Login successful'
+end
+
+Given /the articles with id "(\d+)" and "(\d+)" were successfully merged$/ do |id1, id2|
+  article = Article.find_by_id(id1)
+  article.merge_with(id2)
+end
+
+Then /"(.*?)" should be author of (\d+) articles$/ do |user, num|
+  assert Article.find_all_by_author(User.find_by_name(user).login).size == Integer(num)
+end
+
+Given /the following (.*?) exist:$/ do |type, table|
+  table.hashes.each do |element|
+    if  type == "users"
+      User.create(element)
+    elsif type == "articles"
+      Article.create(element)
+    elsif type == "comments"
+      Comment.create(element)
+    elsif type == "categories"
+      Category.create(element)
+    end
+  end
 end
