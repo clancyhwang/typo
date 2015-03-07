@@ -416,6 +416,19 @@ class Article < Content
     user.admin? || user_id == user.id
   end
 
+  def merge_with(sec_id)
+    other = Article.find_by_id(sec_id)
+    if not self.id or not other.id
+      return false
+    end
+    self.body = self.body + "\n\n" + other.body
+    self.comments << other.comments
+    self.save!
+    other = Article.find_by_id(sec_id)
+    other.destroy
+    return true
+  end
+
   protected
 
   def set_published_at
